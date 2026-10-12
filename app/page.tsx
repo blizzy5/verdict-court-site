@@ -11,12 +11,13 @@ interface Stats {
   community: { kol_tracked: number };
 }
 
+// Shown until the API answers, and if it never does: zeros, never a remembered figure.
 const FALLBACK: Stats = {
-  verdict_court: { total_ruggers_tracked: 50, total_trusted_devs: 31, total_verdicts_rendered: 81 },
-  shield: { total_scans: 0, tokens_scanned: 0, threats_detected: 0, scanners_active: 5 },
-  tools: { total: 22, installed: 13 },
-  anti_spyware: { pegasus_iocs: 54, scam_domains: 228 },
-  community: { kol_tracked: 30 },
+  verdict_court: { total_ruggers_tracked: 0, total_trusted_devs: 0, total_verdicts_rendered: 0 },
+  shield: { total_scans: 0, tokens_scanned: 0, threats_detected: 0, scanners_active: 0 },
+  tools: { total: 0, installed: 0 },
+  anti_spyware: { pegasus_iocs: 0, scam_domains: 0 },
+  community: { kol_tracked: 0 },
 };
 
 function fmt(n: number): string {
@@ -25,7 +26,7 @@ function fmt(n: number): string {
 }
 
 function EyeAgentSection() {
-  const [courtStats, setCourtStats] = useState({ total_cases: 0, open_cases: 0, guilty: 0, investigators: 8 });
+  const [courtStats, setCourtStats] = useState({ total_cases: 0, open_cases: 0, guilty: 0, investigators: 0 });
   const [lastCase, setLastCase] = useState<{ case_id: string; title: string; verdict?: string } | null>(null);
 
   useEffect(() => {
@@ -221,11 +222,10 @@ export default function HomePage() {
           <p className="font-court text-sm text-[#d4a056]/60 uppercase tracking-[0.3em]">Evidence Room</p>
           <div className="gold-line max-w-[100px] mx-auto mt-2" />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <CourtStat value={String(stats.tools.total)} label="Weapons" icon="⚔️" color="#d4a056" />
           <CourtStat value={fmt(stats.anti_spyware.pegasus_iocs)} label="Pegasus IOCs" icon="🦅" color="#FF4444" />
           <CourtStat value={fmt(stats.anti_spyware.scam_domains)} label="Scam Domains" icon="🕸️" color="#FF4444" />
-          <CourtStat value={fmt(stats.community.kol_tracked)} label="KOLs Watched" icon="👁️" color="#8B5CF6" />
           <CourtStat value={fmt(sh.threats_detected)} label="Threats Found" icon="🎯" color="#FFB020" />
         </div>
       </section>
