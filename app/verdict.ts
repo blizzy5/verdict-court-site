@@ -16,7 +16,7 @@ export function chainFamily(address: string): "EVM" | "Solana" {
 // What the Court is willing to print. An address with no token launch has no verdict,
 // and "serial rugger" takes at least two detected rugs.
 export function shownVerdict(verdict: string, totalTokens = 0, ruggedTokens = 0): string {
-  if (totalTokens === 0) return "NO RECORD";
+  if (verdict === "NO_RECORD" || totalTokens === 0) return "NO RECORD";
   if (verdict === "SERIAL_RUGGER" && ruggedTokens < 2) return "UNDER REVIEW";
   return verdict;
 }

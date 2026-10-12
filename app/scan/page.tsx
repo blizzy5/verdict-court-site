@@ -148,7 +148,7 @@ export default function ScanPage() {
     doLookup(query, mode);
   }
 
-  const noRecord = (dev?.total_tokens ?? 0) === 0;
+  const noRecord = dev?.verdict === "NO_RECORD" || (dev?.total_tokens ?? 0) === 0;
   const vc = dev ? shownVerdict(dev.verdict, dev.total_tokens, dev.rugged_tokens) : "";
   const color = VERDICT_COLORS[vc] || "#4488FF";
   const mi = MODE_INFO[mode];
