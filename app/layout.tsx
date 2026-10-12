@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import Link from "next/link";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./Navbar";
@@ -26,15 +28,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}>
       <body className="min-h-screen flex flex-col court-bg">
-        <Navbar />
+        <Suspense fallback={<div className="sticky top-0 h-14 bg-[#0c0806]/95 border-b border-[#b88648]/15" />}>
+          <Navbar />
+        </Suspense>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-[#b88648]/10 py-8 text-center">
           <div className="gold-line max-w-xs mx-auto mb-4" />
           <p className="text-xs text-[#e8dcc8]/20 font-mono">
             VERDICT COURT &copy; 2026 &mdash; Powered by TheHat Engine
           </p>
-          <p className="text-xs text-[#e8dcc8]/15 mt-1">
+          <p className="text-xs text-[#e8dcc8]/40 mt-1">
             <a href="https://x.com/verdict_Court" target="_blank" rel="noopener" className="hover:text-[#d4a056] transition-colors">@verdict_Court</a>
+            {" · "}
+            <Link href="/privacy" className="hover:text-[#d4a056] transition-colors">Privacy</Link>
           </p>
         </footer>
       </body>

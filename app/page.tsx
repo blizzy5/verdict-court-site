@@ -75,7 +75,8 @@ function EyeAgentSection() {
             <p className="text-[10px] font-mono text-[#e8dcc8]/20 mt-1">{lastCase.case_id}</p>
           </Link>
         )}
-        <div className="flex gap-3 mt-4">
+        <div className="flex flex-wrap gap-3 mt-4">
+          <Link href="/recovery" className="text-xs font-mono text-[#14F195] hover:underline">Funds stolen? Open a case →</Link>
           <Link href="/cases" className="text-xs font-mono text-[#d4a056] hover:underline">View all cases →</Link>
           <Link href="/investigators" className="text-xs font-mono text-[#8B5CF6] hover:underline">Hall of Fame →</Link>
           <Link href="/submit" className="text-xs font-mono text-[#FF4444] hover:underline">Submit evidence →</Link>
@@ -243,7 +244,7 @@ export default function HomePage() {
           href="/pricing"
           className="inline-block px-7 py-3 bg-[#8B5CF6] text-white font-bold rounded-lg hover:bg-[#8B5CF6]/80 transition-all text-sm tracking-wide"
         >
-          View Shield Plans
+          View plans
         </Link>
       </section>
     </div>

@@ -9,7 +9,9 @@ On-chain security tribunal for Solana. Track developers, verify tokens, protect 
 - `/` — Court homepage with live stats
 - `/ranking` — Developer trust rankings
 - `/scan` — Scan developers, tokens, KOLs, wallets
-- `/pricing` — Shield premium plans
+- `/pricing` — Plans and pricing
+- `/recovery` — Report a theft and follow a case
+- `/privacy` — Privacy notice
 - `/tools` — Security tools overview
 - `/blocklist` — Anti-phishing DNS blocklist downloads
 

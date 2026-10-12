@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -39,7 +39,22 @@ function truncAddr(a: string): string {
   return `${a.slice(0, 6)}...${a.slice(-4)}`;
 }
 
+const LOADING = (
+  <div className="max-w-3xl mx-auto px-4 py-20 text-center">
+    <p className="text-[#e8dcc8]/20 font-mono text-sm">Loading case file...</p>
+  </div>
+);
+
+// useParams() is runtime data: it has to sit under Suspense to prerender the shell.
 export default function CaseDetailPage() {
+  return (
+    <Suspense fallback={LOADING}>
+      <CaseFileView />
+    </Suspense>
+  );
+}
+
+function CaseFileView() {
   const params = useParams();
   const id = params?.id as string;
   const [c, setC] = useState<CaseDetail | null>(null);
@@ -61,11 +76,7 @@ export default function CaseDetailPage() {
     </div>
   );
 
-  if (!c) return (
-    <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-      <p className="text-[#e8dcc8]/20 font-mono text-sm">Loading case file...</p>
-    </div>
-  );
+  if (!c) return LOADING;
 
   const vc = VERDICT_COLORS[c.verdict ?? "OPEN"] || "#4488FF";
 

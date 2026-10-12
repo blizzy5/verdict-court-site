@@ -114,8 +114,9 @@ export default function SubmitPage() {
         )}
       </form>
 
-      <p className="text-center text-[10px] text-[#e8dcc8]/15 mt-6 font-mono">
-        All reports are anonymous. False reports will be flagged.
+      <p className="text-center text-[10px] text-[#e8dcc8]/40 mt-6 font-mono">
+        All reports are anonymous. False reports will be flagged.{" "}
+        <a href="/privacy" className="hover:text-[#d4a056] underline">Privacy notice</a>
       </p>
     </div>
   );
