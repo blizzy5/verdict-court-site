@@ -65,7 +65,6 @@ export default function ScanPage() {
   const [mode, setMode] = useState<ScanMode>("dev");
   const [dev, setDev] = useState<DevProfile | null>(null);
   const [kol, setKol] = useState<KOL | null>(null);
-  const [kolList, setKolList] = useState<KOL[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -74,8 +73,6 @@ export default function ScanPage() {
     const params = new URLSearchParams(window.location.search);
     const addr = params.get("address");
     if (addr) { setQuery(addr); doLookup(addr, "dev"); }
-    // Preload KOL leaderboard for search
-    fetch("https://thehat-production.up.railway.app/api/v2/solana/kol/leaderboard").then(r => r.json()).then(d => setKolList(d.leaderboard || [])).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -90,18 +87,8 @@ export default function ScanPage() {
 
     try {
       if (m === "kol") {
-        // Search KOL by handle/name in preloaded list
-        const match = kolList.find(k =>
-          k.handle?.toLowerCase() === clean.toLowerCase() ||
-          k.name?.toLowerCase() === clean.toLowerCase() ||
-          k.handle?.toLowerCase().includes(clean.toLowerCase()) ||
-          k.name?.toLowerCase().includes(clean.toLowerCase())
-        );
-        if (match) {
-          setKol(match);
-        } else {
-          setError(`KOL "@${clean}" not found in our database of ${kolList.length} tracked influencers.`);
-        }
+        // No KOL figure is published until it comes from verified, sourced calls.
+        setError("KOL profiles are not published yet. The Court only publishes figures it has verified.");
         setLoading(false);
         return;
       }
@@ -354,7 +341,7 @@ export default function ScanPage() {
             </div>
             <div className="bg-[#0c0806]/40 rounded-lg p-3 text-left">
               <p className="text-[#8B5CF6] font-bold mb-1">📢 KOL / CT</p>
-              <p className="text-[#e8dcc8]/25">@username → trust score, shill history, rug call rate</p>
+              <p className="text-[#e8dcc8]/25">Not published yet — verified figures only</p>
             </div>
             <div className="bg-[#0c0806]/40 rounded-lg p-3 text-left">
               <p className="text-[#4488FF] font-bold mb-1">💼 Wallet</p>

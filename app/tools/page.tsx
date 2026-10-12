@@ -48,7 +48,6 @@ const CATEGORIES: { name: string; color: string; icon: string; desc: string; too
   {
     name: "Community Intel", color: "#8B5CF6", icon: "👥", desc: "Crowdsourced intelligence, verified by the Court.",
     tools: [
-      { name: "KOL Leaderboard", desc: "Trust scores for 30+ tracked influencers based on call accuracy" },
       { name: "Community Reports", desc: "Submit and browse community-verified rug reports" },
       { name: "Shill Detection", desc: "AI-powered detection of coordinated promotion campaigns" },
     ],
