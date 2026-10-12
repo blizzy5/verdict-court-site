@@ -8,6 +8,10 @@ export interface Tier {
   price: number; // USD per month
   pitch: string;
   includes: string[];
+  // Announced but not built yet: shown as planned, never sold as available.
+  planned?: string[];
+  // True while the tier adds nothing that exists yet: it cannot be bought.
+  closed?: boolean;
 }
 
 export const TIERS: Tier[] = [
@@ -33,7 +37,8 @@ export const TIERS: Tier[] = [
     icon: "🧪",
     price: 99,
     pitch: "Research a token before you touch it.",
-    includes: ["Everything in Shield", "Token due diligence reports", "Threat-intel address lookups"],
+    includes: ["Everything in Shield", "Token due diligence reports"],
+    planned: ["Threat-intel address lookups"],
   },
   {
     key: "investigator",
@@ -41,7 +46,8 @@ export const TIERS: Tier[] = [
     icon: "🔍",
     price: 149,
     pitch: "Follow the money yourself.",
-    includes: ["Everything in Analyst", "Investigation reports (PDF)", "Automated smart contract audits"],
+    includes: ["Everything in Analyst", "Investigation reports (PDF)"],
+    planned: ["Automated smart contract audits"],
   },
   {
     key: "protocol",
@@ -49,6 +55,8 @@ export const TIERS: Tier[] = [
     icon: "🏛️",
     price: 199,
     pitch: "For teams with users to protect.",
-    includes: ["Everything in Investigator", "Forensic AML reports", "Bug-report intake and triage"],
+    includes: ["Everything in Investigator"],
+    planned: ["Forensic AML reports", "Bug-report intake and triage"],
+    closed: true,
   },
 ];

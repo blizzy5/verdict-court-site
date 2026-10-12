@@ -25,8 +25,8 @@ const TIER_NAMES: Record<string, string> = Object.fromEntries(TIERS.map((t) => [
 const PER_REPORT = [
   { icon: "🔍", name: "Investigation report", from: "Investigator" },
   { icon: "🧪", name: "Token due diligence", from: "Analyst" },
-  { icon: "📜", name: "Smart contract audit", from: "Investigator" },
-  { icon: "🏛️", name: "Forensic AML report", from: "Protocol" },
+  { icon: "📜", name: "Smart contract audit", from: "Investigator", planned: true },
+  { icon: "🏛️", name: "Forensic AML report", from: "Protocol", planned: true },
 ];
 
 function StatusCheck() {
@@ -117,7 +117,7 @@ export default function PricingPage() {
   const tier = TIERS.find((t) => t.key === selected);
   const apiPlan = selected ? data?.plans?.[selected] : undefined;
   // A tier can be bought only when the API sells that exact plan at that exact price.
-  const purchasable = !!tier && !!apiPlan && apiPlan.price_usdc === tier.price;
+  const purchasable = !!tier && !tier.closed && !!apiPlan && apiPlan.price_usdc === tier.price;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -155,6 +155,11 @@ export default function PricingPage() {
                     <span className="text-[#d4a056]">✓</span> {f}
                   </li>
                 ))}
+                {t.planned?.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-[#e8dcc8]/25">
+                    <span>○</span> <span>{f} <span className="font-mono text-[10px] uppercase">· planned</span></span>
+                  </li>
+                ))}
               </ul>
               {t.price === 0 ? (
                 <Link
@@ -163,6 +168,10 @@ export default function PricingPage() {
                 >
                   Start scanning
                 </Link>
+              ) : t.closed ? (
+                <p className="mt-auto text-center w-full py-2.5 rounded-xl text-sm font-court border border-[#4488FF]/20 text-[#4488FF]/70">
+                  Not open yet
+                </p>
               ) : (
                 <button
                   type="button"
@@ -207,7 +216,9 @@ export default function PricingPage() {
             <div key={r.name} className="wood-card p-5 text-center">
               <span className="text-2xl block mb-2">{r.icon}</span>
               <h3 className="font-court text-base text-[#e8dcc8] mb-1">{r.name}</h3>
-              <p className="text-[10px] font-mono text-[#d4a056]/60 uppercase tracking-wider">Included from {r.from}</p>
+              <p className="text-[10px] font-mono text-[#d4a056]/60 uppercase tracking-wider">
+                {r.planned ? "Planned" : `Included from ${r.from}`}
+              </p>
             </div>
           ))}
         </div>

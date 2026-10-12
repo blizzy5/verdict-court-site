@@ -9,7 +9,7 @@ export default function SubmitPage() {
   const [description, setDescription] = useState("");
   const [evidence, setEvidence] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<"success" | "error" | null>(null);
+  const [result, setResult] = useState<"success" | "error" | "limit" | null>(null);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -28,7 +28,7 @@ export default function SubmitPage() {
           reported_by: "web_form",
         }),
       });
-      setResult(res.ok ? "success" : "error");
+      setResult(res.ok ? "success" : res.status === 429 ? "limit" : "error");
       if (res.ok) { setAddress(""); setDescription(""); setEvidence(""); }
     } catch {
       setResult("error");
@@ -45,7 +45,7 @@ export default function SubmitPage() {
           <span className="text-gold">Submit</span>{" "}
           <span className="text-[#e8dcc8]">Evidence</span>
         </h1>
-        <p className="text-[#e8dcc8]/40 text-sm">Help the Court investigate. Every report is reviewed.</p>
+        <p className="text-[#e8dcc8]/40 text-sm">Every report is reviewed and verified on-chain before anything is published.</p>
         <div className="gold-line mt-4 max-w-xs mx-auto" />
       </div>
 
@@ -75,6 +75,8 @@ export default function SubmitPage() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the suspected rug pull, scam, or malicious activity..."
             required
+            minLength={10}
+            maxLength={3000}
             rows={4}
             className="w-full bg-[#1a120a] border border-[#d4a056]/20 rounded-xl px-4 py-3 text-sm text-[#e8dcc8] placeholder:text-[#e8dcc8]/20 focus:outline-none focus:border-[#d4a056]/60 transition-colors resize-none"
           />
@@ -104,7 +106,13 @@ export default function SubmitPage() {
 
         {result === "success" && (
           <div className="mt-4 p-4 bg-[#14F195]/10 border border-[#14F195]/20 rounded-xl text-center">
-            <p className="text-[#14F195] text-sm font-court">Report submitted. The Court will investigate.</p>
+            <p className="text-[#14F195] text-sm font-court">Received. It will be verified on-chain before any publication.</p>
+            <p className="text-xs text-[#e8dcc8]/40 mt-1">A report alone changes no score and no verdict.</p>
+          </div>
+        )}
+        {result === "limit" && (
+          <div className="mt-4 p-4 bg-[#FFB020]/10 border border-[#FFB020]/30 rounded-xl text-center">
+            <p className="text-[#FFB020] text-sm font-court">Too many reports from this connection. Try again in an hour.</p>
           </div>
         )}
         {result === "error" && (
