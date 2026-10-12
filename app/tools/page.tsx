@@ -13,7 +13,7 @@ const CATEGORIES: { name: string; color: string; icon: string; desc: string; too
   {
     name: "Developer Intelligence", color: "#8B5CF6", icon: "👤", desc: "Every deployer scored. Side wallets exposed. History tracked.",
     tools: [
-      { name: "Dev Profiler", desc: "Builds a complete history of every wallet that deploys tokens on Solana" },
+      { name: "Dev Profiler", desc: "Builds the launch history of token deployers: complete on Solana (pump.fun), partial on EVM chains" },
       { name: "Side Wallet Linker", desc: "Traces fund flows to identify connected wallets used by the same actor" },
       { name: "Rug Pattern Matcher", desc: "Cross-references deployer behavior with known rug pull patterns" },
       { name: "Verdict Engine", desc: "Scores developers TRUSTED / NEUTRAL / SUSPECT / SERIAL_RUGGER" },
@@ -40,7 +40,7 @@ const CATEGORIES: { name: string; color: string; icon: string; desc: string; too
   {
     name: "Wallet Security", color: "#4488FF", icon: "💼", desc: "Know your exposure before it's too late.",
     tools: [
-      { name: "Wallet Tracer", desc: "Follow the money across Solana — tracks fund flows between wallets" },
+      { name: "Wallet Tracer", desc: "Follow the money across Solana and EVM chains — tracks fund flows between wallets" },
       { name: "Risk Score Engine", desc: "Assigns a risk score to any wallet based on interaction history" },
       { name: "Approval Checker", desc: "Lists all token approvals and flags dangerous unlimited approvals" },
     ],

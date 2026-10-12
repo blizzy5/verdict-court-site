@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CHAINS, chainFamily, shownVerdict } from "../verdict";
 
 interface Dev {
   address: string;
@@ -33,12 +34,15 @@ export default function RankingPage() {
 
   useEffect(() => {
     const API = "https://thehat-production.up.railway.app";
-    Promise.all([
-      fetch(`${API}/api/v2/solana/dev/ranking?sort=score&order=desc&limit=25`)
-        .then((r) => r.json()).then((d) => setTrusted(d.developers || [])).catch(() => {}),
-      fetch(`${API}/api/v2/solana/dev/ranking?sort=score&order=asc&limit=25`)
-        .then((r) => r.json()).then((d) => setRuggers(d.developers || [])).catch(() => {}),
-    ]).finally(() => setLoaded(true));
+    // Only what the Court stands behind is listed: a trusted verdict, or at least one detected rug.
+    fetch(`${API}/api/v2/solana/dev/ranking?sort=score`)
+      .then((r) => r.json())
+      .then((d) => {
+        setTrusted((d.top_devs ?? []).filter((v: Dev) => v.verdict === "TRUSTED"));
+        setRuggers((d.worst_devs ?? []).filter((v: Dev) => (v.rugged_tokens ?? 0) >= 1));
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }, []);
 
   const list = tab === "trusted" ? trusted : ruggers;
@@ -50,7 +54,7 @@ export default function RankingPage() {
       </h1>
       <p className="text-[#e8dcc8]/40 text-sm mb-3">Scored by on-chain history. No appeals.</p>
       <div className="flex flex-wrap gap-1.5 mb-4">
-        {["Ethereum", "BSC", "Arbitrum", "Polygon", "Avalanche", "Base", "Optimism", "Robinhood", "Solana", "SUI"].map(c => (
+        {CHAINS.map(c => (
           <span key={c} className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#d4a056]/8 text-[#d4a056]/50 border border-[#d4a056]/10">
             {c}
           </span>
@@ -116,6 +120,7 @@ export default function RankingPage() {
                   <td className="py-3 px-4">
                     <Link href={`/scan?address=${dev.address}`} className="hover:text-[#d4a056] transition-colors">
                       <span className="font-mono text-xs">{truncAddr(dev.address)}</span>
+                      <span className="ml-2 text-[9px] font-mono text-[#d4a056]/50 uppercase">{chainFamily(dev.address)}</span>
                       {dev.alias && (
                         <span className="ml-2 text-[#e8dcc8]/50 text-xs">({dev.alias})</span>
                       )}
@@ -129,7 +134,7 @@ export default function RankingPage() {
                         color: VERDICT_COLORS[dev.verdict] || "#4488FF",
                       }}
                     >
-                      {dev.verdict}
+                      {shownVerdict(dev.verdict, dev.total_tokens, dev.rugged_tokens)}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right font-mono font-bold" style={{ color: VERDICT_COLORS[dev.verdict] || "#4488FF" }}>

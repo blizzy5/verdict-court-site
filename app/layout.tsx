@@ -11,10 +11,10 @@ const playfair = Playfair_Display({ variable: "--font-court", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "Verdict Court — The Court Never Lies",
-  description: "On-chain security tribunal for Solana. Track serial ruggers, verify developers, protect your wallet.",
+  description: "On-chain security tribunal for Solana and EVM chains. Track serial ruggers, verify developers, protect your wallet.",
   openGraph: {
     title: "Verdict Court",
-    description: "The Court never lies. On-chain security tribunal for Solana.",
+    description: "The Court never lies. On-chain security tribunal for Solana and EVM chains.",
     type: "website",
   },
   twitter: {

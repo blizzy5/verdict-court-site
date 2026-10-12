@@ -181,7 +181,7 @@ export default function HomePage() {
           {[
             {
               icon: "🏛️", title: "Developer Court",
-              desc: "Every Solana deployer stands trial. Rugs tracked. Side wallets exposed. Trusted builders verified.",
+              desc: "Token deployers stand trial, on Solana and EVM chains. Rugs tracked. Side wallets exposed. Trusted builders verified.",
               stamp: "JUSTICE", color: "#14F195", href: "/ranking",
             },
             {

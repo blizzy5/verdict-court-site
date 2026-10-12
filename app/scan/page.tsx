@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import { CHAINS, chainFamily, isAddress, shownVerdict } from "../verdict";
 
 interface DevProfile {
   address: string;
@@ -37,11 +38,28 @@ const VERDICT_COLORS: Record<string, string> = {
 };
 
 const MODE_INFO: Record<ScanMode, { icon: string; label: string; placeholder: string; color: string }> = {
-  dev:    { icon: "👤", label: "Developer",  placeholder: "Solana deployer address or alias...",   color: "#14F195" },
+  dev:    { icon: "👤", label: "Developer",  placeholder: "Deployer address (Solana or 0x...) or alias...",   color: "#14F195" },
   token:  { icon: "🪙", label: "Token",      placeholder: "Token mint address...",                 color: "#FFB020" },
   kol:    { icon: "📢", label: "KOL / CT",   placeholder: "@username (Twitter/X or Telegram)...",  color: "#8B5CF6" },
-  wallet: { icon: "💼", label: "Wallet",     placeholder: "Any Solana wallet address...",          color: "#4488FF" },
+  wallet: { icon: "💼", label: "Wallet",     placeholder: "Any wallet address (Solana or 0x...)...",          color: "#4488FF" },
 };
+
+// The API answers with a profile ({deployer, stats, wallets, flags}) or a search row.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toProfile(d: Record<string, any>): DevProfile {
+  return {
+    address: d.deployer ?? d.address,
+    alias: d.alias ?? undefined,
+    score: d.score,
+    verdict: d.verdict,
+    total_tokens: d.stats?.total_tokens ?? d.total_tokens,
+    rugged_tokens: d.stats?.rugged_tokens ?? d.rugged_tokens,
+    successful_tokens: d.stats?.active_tokens ?? d.active_tokens,
+    side_wallets: d.wallets?.side_wallets,
+    first_seen: d.first_seen ?? undefined,
+    risk_factors: d.flags,
+  };
+}
 
 function truncAddr(a: string): string {
   if (!a || a.length < 12) return a || "—";
@@ -101,7 +119,7 @@ export default function ScanPage() {
 
       // Dev or Wallet — both use dev profile lookup (direct public API)
       const API = "https://thehat-production.up.railway.app";
-      const isAddr = clean.length >= 32;
+      const isAddr = isAddress(clean);
       const url = isAddr
         ? `${API}/api/v2/solana/dev/profile?address=${encodeURIComponent(clean)}`
         : `${API}/api/v2/solana/dev/search?q=${encodeURIComponent(clean)}`;
@@ -110,11 +128,11 @@ export default function ScanPage() {
 
       if (data.error) {
         setError(data.error === "API unavailable" ? "API temporarily unavailable. Try again." : "Not found in our database.");
-      } else if (data.developers) {
-        if (data.developers.length > 0) setDev(data.developers[0]);
+      } else if (data.results) {
+        if (data.results.length > 0) setDev(toProfile(data.results[0]));
         else setError("No results found.");
-      } else if (data.address) {
-        setDev(data);
+      } else if (data.deployer) {
+        setDev(toProfile(data));
       } else {
         setError("Not found in our database.");
       }
@@ -130,7 +148,8 @@ export default function ScanPage() {
     doLookup(query, mode);
   }
 
-  const vc = dev?.verdict || "";
+  const noRecord = (dev?.total_tokens ?? 0) === 0;
+  const vc = dev ? shownVerdict(dev.verdict, dev.total_tokens, dev.rugged_tokens) : "";
   const color = VERDICT_COLORS[vc] || "#4488FF";
   const mi = MODE_INFO[mode];
 
@@ -142,6 +161,9 @@ export default function ScanPage() {
       </h1>
       <p className="text-[#e8dcc8]/40 text-sm mb-2">
         Developer, token, KOL, or wallet. The Court will render its verdict.
+      </p>
+      <p className="text-[#e8dcc8]/25 text-xs font-mono mb-2">
+        {CHAINS.join(" · ")}. Full launch history on Solana (pump.fun) only.
       </p>
       <div className="gold-line mb-6" />
 
@@ -263,6 +285,7 @@ export default function ScanPage() {
                 {mode === "wallet" ? "Wallet Profile" : "Developer Profile"}
               </p>
               <p className="font-mono text-sm text-[#e8dcc8]/70 break-all">{dev.address}</p>
+              <p className="text-[10px] font-mono text-[#d4a056]/50 uppercase tracking-wider mt-1">{chainFamily(dev.address)}</p>
               {dev.alias && <p className="text-[#e8dcc8]/50 text-sm mt-1">Alias: {dev.alias}</p>}
             </div>
             <span
@@ -275,14 +298,20 @@ export default function ScanPage() {
 
           <div className="gold-line mb-6" />
 
+          {noRecord && (
+            <p className="text-sm text-[#e8dcc8]/60 mb-6">
+              No token launch is on record for this address. The Court has no verdict on it.
+            </p>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-[#0c0806]/60 border border-[#d4a056]/10 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold font-mono" style={{ color }}>{dev.score}</p>
+              <p className="text-2xl font-bold font-mono" style={{ color }}>{noRecord ? "—" : dev.score}</p>
               <p className="text-xs text-[#d4a056]/50 mt-1 uppercase tracking-wider font-court">Score</p>
             </div>
             <div className="bg-[#0c0806]/60 border border-[#d4a056]/10 rounded-xl p-4 text-center">
               <p className="text-2xl font-bold font-mono text-[#14F195]">{dev.successful_tokens ?? "—"}</p>
-              <p className="text-xs text-[#d4a056]/50 mt-1 uppercase tracking-wider font-court">Clean</p>
+              <p className="text-xs text-[#d4a056]/50 mt-1 uppercase tracking-wider font-court">Active</p>
             </div>
             <div className="bg-[#0c0806]/60 border border-[#d4a056]/10 rounded-xl p-4 text-center">
               <p className="text-2xl font-bold font-mono text-[#FF4444]">{dev.rugged_tokens ?? 0}</p>
@@ -333,7 +362,7 @@ export default function ScanPage() {
           <div className="grid grid-cols-2 gap-3 max-w-md mx-auto text-xs">
             <div className="bg-[#0c0806]/40 rounded-lg p-3 text-left">
               <p className="text-[#14F195] font-bold mb-1">👤 Developer</p>
-              <p className="text-[#e8dcc8]/25">Solana deployer address → rug history, side wallets, verdict</p>
+              <p className="text-[#e8dcc8]/25">Deployer address, Solana or EVM → rug history, side wallets, verdict</p>
             </div>
             <div className="bg-[#0c0806]/40 rounded-lg p-3 text-left">
               <p className="text-[#FFB020] font-bold mb-1">🪙 Token</p>

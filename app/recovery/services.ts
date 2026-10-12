@@ -125,4 +125,7 @@ export const CHAINS: { id: string; label: string }[] = [
   { id: "blast", label: "Blast" },
   { id: "zksync", label: "zkSync" },
   { id: "mantle", label: "Mantle" },
+  { id: "robinhood", label: "Robinhood Chain" },
+  { id: "arc", label: "Arc" },
+  { id: "hyperevm", label: "HyperEVM" },
 ];

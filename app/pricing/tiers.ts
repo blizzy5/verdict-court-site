@@ -29,7 +29,7 @@ export const TIERS: Tier[] = [
     icon: "🛡️",
     price: 49,
     pitch: "Your wallet, watched around the clock.",
-    includes: ["Everything in Free", "Real-time scanner alerts", "Honeypot detection", "Whale and deployer tracking"],
+    includes: ["Everything in Free", "Alerts within seconds on Solana, minutes on EVM chains", "Honeypot detection", "Whale and deployer tracking"],
   },
   {
     key: "analyst",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { ADDRESS_PATTERN } from "../verdict";
 
 const API = "https://thehat-production.up.railway.app";
 
@@ -59,8 +60,10 @@ export default function SubmitPage() {
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="Solana deployer address..."
+            placeholder="Address, Solana or 0x..."
             required
+            pattern={ADDRESS_PATTERN}
+            title="A Solana address or an EVM address starting with 0x"
             className="w-full bg-[#1a120a] border border-[#d4a056]/20 rounded-xl px-4 py-3 text-sm font-mono text-[#e8dcc8] placeholder:text-[#e8dcc8]/20 focus:outline-none focus:border-[#d4a056]/60 transition-colors"
           />
         </div>

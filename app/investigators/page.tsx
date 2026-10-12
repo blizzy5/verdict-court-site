@@ -10,16 +10,15 @@ interface Investigator {
   name: string;
   specialty: string;
   cases_contributed: number;
-  accuracy: number;
-  reputation_score: number;
+  cases_in_progress?: number;
+  cases_waiting?: number;
+  cases_published?: number;
+  progress_label?: string;
 }
 
-const MEDALS = ["🥇", "🥈", "🥉"];
-
-function scoreColor(s: number): string {
-  if (s >= 90) return "#14F195";
-  if (s >= 70) return "#d4a056";
-  return "#FFB020";
+// Sources listed only for the case files they brought carry an internal label: show a public one.
+function specialty(text: string): string {
+  return text.startsWith("Source de dossiers") ? "Case-file source" : text;
 }
 
 export default function InvestigatorsPage() {
@@ -40,24 +39,20 @@ export default function InvestigatorsPage() {
           <span className="text-gold">Hall of</span>{" "}
           <span className="text-[#e8dcc8]">Fame</span>
         </h1>
-        <p className="text-[#e8dcc8]/40 text-sm">The detectives who keep crypto honest.</p>
+        <p className="text-[#e8dcc8]/40 text-sm">The detectives who keep crypto honest, ranked by the case files they brought.</p>
         <div className="gold-line mt-4 max-w-xs mx-auto" />
       </div>
 
       <div className="space-y-4">
         {investigators.map((inv, i) => {
-          const sc = scoreColor(inv.reputation_score);
-          const medal = i < 3 ? MEDALS[i] : `#${i + 1}`;
           const isVerdictCourt = inv.handle === "@verdict_Court";
 
           return (
             <div key={inv.handle} className={`wood-card p-6 ${isVerdictCourt ? "ring-1 ring-[#d4a056]/30" : ""}`}>
               <div className="flex items-center gap-4">
                 {/* Rank */}
-                <div className="text-2xl w-10 text-center shrink-0">
-                  {typeof medal === "string" && medal.startsWith("#")
-                    ? <span className="font-mono text-lg text-[#e8dcc8]/20">{medal}</span>
-                    : medal}
+                <div className="w-10 text-center shrink-0">
+                  <span className="font-mono text-lg text-[#e8dcc8]/20">#{i + 1}</span>
                 </div>
 
                 {/* Info */}
@@ -68,30 +63,33 @@ export default function InvestigatorsPage() {
                       <span className="verdict-badge bg-[#d4a056]/15 text-[#d4a056] text-[9px]">THIS COURT</span>
                     )}
                   </div>
-                  <a
-                    href={inv.platform === "youtube"
-                      ? `https://youtube.com/${inv.handle.replace("@", "")}`
-                      : `https://x.com/${inv.handle.replace("@", "")}`}
-                    target="_blank"
-                    rel="noopener"
-                    className="text-[#8B5CF6] text-sm font-mono hover:underline"
-                  >
-                    {inv.handle}
-                  </a>
-                  <p className="text-xs text-[#e8dcc8]/30 mt-1">{inv.specialty}</p>
+                  {inv.handle.startsWith("@") && (
+                    <a
+                      href={inv.platform === "youtube"
+                        ? `https://youtube.com/${inv.handle.replace("@", "")}`
+                        : `https://x.com/${inv.handle.replace("@", "")}`}
+                      target="_blank"
+                      rel="noopener"
+                      className="text-[#8B5CF6] text-sm font-mono hover:underline"
+                    >
+                      {inv.handle}
+                    </a>
+                  )}
+                  <p className="text-xs text-[#e8dcc8]/30 mt-1">{specialty(inv.specialty)}</p>
                 </div>
 
-                {/* Score */}
+                {/* Progress, counted in case files */}
                 <div className="text-right shrink-0">
-                  <p className="text-2xl font-bold font-mono" style={{ color: sc }}>{inv.reputation_score}</p>
-                  <p className="text-[10px] text-[#d4a056]/50 uppercase tracking-wider font-court">Score</p>
+                  <p className="text-lg font-bold font-mono text-[#d4a056]">{inv.progress_label ?? "—"}</p>
+                  <p className="text-[10px] text-[#d4a056]/50 uppercase tracking-wider font-court">Cases closed</p>
                 </div>
               </div>
 
               {inv.cases_contributed > 0 && (
-                <div className="flex gap-4 mt-3 pt-3 border-t border-[#d4a056]/10 text-xs font-mono text-[#e8dcc8]/25">
-                  <span>{inv.cases_contributed} cases</span>
-                  {inv.accuracy > 0 && <span>{Math.round(inv.accuracy * 100)}% accuracy</span>}
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 pt-3 border-t border-[#d4a056]/10 text-xs font-mono text-[#e8dcc8]/25">
+                  <span>{inv.cases_in_progress ?? 0} in progress</span>
+                  <span>{inv.cases_waiting ?? 0} waiting</span>
+                  {(inv.cases_published ?? 0) > 0 && <span>{inv.cases_published} published</span>}
                 </div>
               )}
             </div>
