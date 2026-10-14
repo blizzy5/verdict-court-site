@@ -186,7 +186,7 @@ export default function HomePage() {
             },
             {
               icon: "🛡️", title: "Shield Division",
-              desc: "5 autonomous agents patrol the chain 24/7. Honeypots, whales, and KOL shills — nothing escapes.",
+              desc: "5 autonomous agents patrol the chain 24/7. Honeypots, whales and serial deployers — nothing escapes.",
               stamp: "PROTECTION", color: "#8B5CF6", href: "/pricing",
             },
             {
@@ -236,9 +236,9 @@ export default function HomePage() {
           PROTECTED
         </span>
         <span className="text-4xl block mb-4">🛡️</span>
-        <h2 className="font-court text-2xl font-bold mb-3 text-[#e8dcc8]">Shield Premium</h2>
+        <h2 className="font-court text-2xl font-bold mb-3 text-[#e8dcc8]">Shield</h2>
         <p className="text-[#e8dcc8]/30 text-sm mb-6 max-w-md mx-auto">
-          The Court&apos;s personal protection for your wallet. Real-time alerts, honeypot detection, KOL tracking.
+          The Court&apos;s personal protection for your wallet. Real-time alerts, honeypot detection, deployer tracking.
         </p>
         <Link
           href="/pricing"

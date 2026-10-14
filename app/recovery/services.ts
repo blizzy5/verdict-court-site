@@ -74,7 +74,7 @@ export const SERVICES: Service[] = [
     name: "Shield Monitoring",
     tagline: "Five autonomous scanners watching for threats around the clock.",
     points: ["Real-time scanner alerts", "Honeypot detection", "Whale and deployer tracking"],
-    billing: "From the Shield plan — $49 a month",
+    billing: "From the Pro plan — $29 a month",
     status: "live",
     href: "/pricing",
     cta: "See plans",

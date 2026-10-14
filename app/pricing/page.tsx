@@ -22,6 +22,11 @@ interface Access {
 
 const TIER_NAMES: Record<string, string> = Object.fromEntries(TIERS.map((t) => [t.key, t.name]));
 
+const GROUPS = [
+  { key: "community", title: "Community", sub: "Telegram bot and Shield app. Pay with Telegram Stars in the bot, or from your wallet." },
+  { key: "detective", title: "Detective", sub: "Research tools on this site and through the API." },
+] as const;
+
 const PER_REPORT = [
   { icon: "🔍", name: "Investigation report", from: "Investigator" },
   { icon: "🧪", name: "Token due diligence", from: "Analyst" },
@@ -124,19 +129,23 @@ export default function PricingPage() {
       <div className="text-center mb-12">
         <span className="verdict-badge bg-[#8B5CF6]/20 text-[#8B5CF6] mb-4 inline-block">Pricing</span>
         <h1 className="text-4xl font-court mb-3">
-          <span className="text-[#e8dcc8]">One plan.</span>{" "}
-          <span className="text-gold glow-gold">Everywhere.</span>
+          <span className="text-[#e8dcc8]">Pick your</span>{" "}
+          <span className="text-gold glow-gold">side of the bench.</span>
         </h1>
         <p className="text-[#e8dcc8]/40 max-w-lg mx-auto text-sm">
-          One price list for Verdict Court and the Shield app. Recovery of stolen funds is separate: nothing to pay
-          unless funds come back.
+          Community plans protect your Telegram groups and your wallet. Detective plans open the research tools of
+          the Court. Recovery of stolen funds is separate: nothing to pay unless funds come back.
         </p>
         <div className="gold-line mt-6 max-w-xs mx-auto" />
       </div>
 
       {/* 1 — plans */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {TIERS.map((t) => {
+      {GROUPS.map((g) => (
+      <section key={g.key} className="mb-12">
+      <p className="font-court text-sm text-[#d4a056]/60 uppercase tracking-[0.3em] text-center mb-1">{g.title}</p>
+      <p className="text-center text-xs text-[#e8dcc8]/40 mb-6">{g.sub}</p>
+      <div className="grid sm:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        {TIERS.filter((t) => t.group === g.key).map((t) => {
           const isSelected = t.key === selected;
           return (
             <div key={t.key} className={`wood-card p-5 flex flex-col ${isSelected ? "ring-2 ring-[#d4a056]" : ""}`}>
@@ -185,6 +194,8 @@ export default function PricingPage() {
           );
         })}
       </div>
+      </section>
+      ))}
 
       <div ref={checkoutRef} className="max-w-2xl mx-auto mt-10 scroll-mt-20">
         {tier && purchasable && apiPlan && (
