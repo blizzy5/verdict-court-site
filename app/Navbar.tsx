@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/", label: "⚖️ Court" },
   { href: "/cases", label: "📁 Cases" },
   { href: "/ranking", label: "📋 Ranking" },
+  { href: "/families", label: "🧬 Families" },
   { href: "/investigators", label: "🏛️ Detectives" },
   { href: "/scan", label: "🔍 Scan" },
   { href: "/recovery", label: "🎩 Recovery" },
