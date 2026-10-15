@@ -10,7 +10,9 @@ export interface Tier {
   includes: string[];
   // Announced but not built yet: shown as planned, never sold as available.
   planned?: string[];
-  group: "community" | "detective";
+  group: "community" | "detective" | "lifetime";
+  // Lifetime offers: paid once, limited number of spots.
+  spots?: number;
   // True while the tier adds nothing that exists yet: it cannot be bought.
   closed?: boolean;
 }
@@ -85,5 +87,35 @@ export const TIERS: Tier[] = [
     includes: ["Everything in Investigator"],
     planned: ["Forensic AML reports", "Bug-report intake and triage"],
     closed: true,
+  },
+  {
+    key: "lifetime_community",
+    group: "lifetime",
+    name: "Community Lifetime",
+    icon: "🛡️",
+    price: 249,
+    spots: 10,
+    pitch: "Premium, paid once.",
+    includes: ["Everything in Premium, for life"],
+  },
+  {
+    key: "lifetime_detective",
+    group: "lifetime",
+    name: "Detective Lifetime",
+    icon: "🔍",
+    price: 499,
+    spots: 10,
+    pitch: "Investigator, paid once.",
+    includes: ["Everything in Investigator, for life"],
+  },
+  {
+    key: "lifetime_bundle",
+    group: "lifetime",
+    name: "Founder Bundle",
+    icon: "👑",
+    price: 699,
+    spots: 5,
+    pitch: "Both sides of the bench, paid once.",
+    includes: ["Community Lifetime", "Detective Lifetime"],
   },
 ];

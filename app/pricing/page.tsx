@@ -25,6 +25,7 @@ const TIER_NAMES: Record<string, string> = Object.fromEntries(TIERS.map((t) => [
 const GROUPS = [
   { key: "community", title: "Community", sub: "Telegram bot and Shield app. Pay with Telegram Stars in the bot, or from your wallet." },
   { key: "detective", title: "Detective", sub: "Research tools on this site and through the API." },
+  { key: "lifetime", title: "Lifetime — founding spots", sub: "Paid once, never again. Entry prices, limited spots: when they are gone, they are gone." },
 ] as const;
 
 const PER_REPORT = [
@@ -86,7 +87,9 @@ function StatusCheck() {
           {access.has_access ? (
             <>
               <span className="text-[#14F195] font-bold">Active</span> — {TIER_NAMES[access.plan ?? ""] ?? access.plan} plan,{" "}
-              {access.days_remaining} day{access.days_remaining === 1 ? "" : "s"} remaining.
+              {access.days_remaining > 30000
+                ? "for life."
+                : `${access.days_remaining} day${access.days_remaining === 1 ? "" : "s"} remaining.`}
             </>
           ) : (
             "No active plan on this wallet."
@@ -122,7 +125,8 @@ export default function PricingPage() {
   const tier = TIERS.find((t) => t.key === selected);
   const apiPlan = selected ? data?.plans?.[selected] : undefined;
   // A tier can be bought only when the API sells that exact plan at that exact price.
-  const purchasable = !!tier && !tier.closed && !!apiPlan && apiPlan.price_usdc === tier.price;
+  const purchasable =
+    !!tier && !tier.closed && !!apiPlan && apiPlan.price_usdc === tier.price && (apiPlan.lifetime ? typeof apiPlan.spots_left === "number" && apiPlan.spots_left > 0 : true);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -144,6 +148,13 @@ export default function PricingPage() {
       <section key={g.key} className="mb-12">
       <p className="font-court text-sm text-[#d4a056]/60 uppercase tracking-[0.3em] text-center mb-1">{g.title}</p>
       <p className="text-center text-xs text-[#e8dcc8]/40 mb-6">{g.sub}</p>
+      {g.key !== "detective" && (
+        <p className="text-center text-xs text-[#e8dcc8]/50 -mt-4 mb-6">
+          Lifetime and Community plans bought on this site cover your wallet in Shield. To get them in the Telegram bot
+          too, type <span className="font-mono text-[#d4a056]">/lier</span> in @thehatpenbot and{" "}
+          <Link href="/link" className="text-[#d4a056] underline">link your wallet</Link>.
+        </p>
+      )}
       <div className="grid sm:grid-cols-3 gap-4 max-w-5xl mx-auto">
         {TIERS.filter((t) => t.group === g.key).map((t) => {
           const isSelected = t.key === selected;
@@ -155,7 +166,21 @@ export default function PricingPage() {
               </div>
               <div className="text-center mb-4">
                 <p className="text-3xl font-bold font-mono text-[#d4a056]">${t.price}</p>
-                <p className="text-xs text-[#e8dcc8]/30 mt-1">{t.price === 0 ? "forever" : "per month"}</p>
+                <p className="text-xs text-[#e8dcc8]/30 mt-1">
+                  {t.price === 0 ? "forever" : t.spots ? "one-time" : "per month"}
+                </p>
+                {t.spots && (
+                  <p className="text-[10px] font-mono uppercase tracking-wider mt-2 text-[#FFB020]">
+                    {(() => {
+                      const left = data?.plans?.[t.key]?.spots_left;
+                      const p = data?.plans?.[t.key];
+                      if (!p) return `${t.spots} spots only`;
+                      if (left === null || left === undefined) return "Spots count unavailable";
+                      if (left === 0) return "Sold out";
+                      return `${left} of ${t.spots} spots left`;
+                    })()}
+                  </p>
+                )}
               </div>
               <p className="text-xs text-[#e8dcc8]/60 text-center mb-4">{t.pitch}</p>
               <ul className="space-y-2 text-xs text-[#e8dcc8]/40 mb-6">

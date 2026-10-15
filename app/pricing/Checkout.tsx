@@ -11,6 +11,10 @@ export interface Plan {
   paid_days: number;
   bonus_days: number;
   total_days: number;
+  // Lifetime offers only. null = the count cannot be read right now.
+  lifetime?: boolean;
+  spots?: number;
+  spots_left?: number | null;
 }
 
 const TOKENS = ["USDC", "SOL", "SKR"] as const;
@@ -91,7 +95,8 @@ export function Checkout({
         }),
       });
       const data = await res.json().catch(() => null);
-      if (res.ok && data?.ok) setDone({ expires_at: data.expires_at, total_days: data.total_days });
+      if (data?.refund) setError("The offer sold out while your payment was being checked: you will be refunded.");
+      else if (res.ok && data?.ok) setDone({ expires_at: data.expires_at, total_days: data.total_days });
       else if (res.status === 400 && typeof data?.error === "string") setError(data.error);
       else setError("Activation is not available right now. Your payment is safe on-chain: try again later with the same signature.");
     } catch {
@@ -117,8 +122,14 @@ export function Checkout({
       <div role="status" className="wood-card p-6 sm:p-8 text-center">
         <span className="stamp text-[#14F195] text-sm">Plan active</span>
         <p className="text-sm text-[#e8dcc8]/60 mt-5">
-          {planLabel} plan, {done.total_days} days. Active until{" "}
-          <span className="text-[#d4a056] font-mono">{fmtDate(done.expires_at)}</span>.
+          {plan.lifetime ? (
+            <>{planLabel}: active for life.</>
+          ) : (
+            <>
+              {planLabel} plan, {done.total_days} days. Active until{" "}
+              <span className="text-[#d4a056] font-mono">{fmtDate(done.expires_at)}</span>.
+            </>
+          )}
         </p>
       </div>
     );
