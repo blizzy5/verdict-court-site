@@ -1,72 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { API, HOLDING, Member, chainLabel, isProven, shownWhy, truncAddr } from "./shared";
 
-interface Member {
-  address: string;
-  chain: string;
-  status: string;
-  score: number;
-  why: string;
-  evm_chains?: string[];
-}
-
-type Tab = "bon_dev" | "trader" | "rugger";
-
-const API = "https://thehat-production.up.railway.app";
+type Tab = "bon_dev" | "trader" | "rugger" | "cluster";
 
 const TABS: { key: Tab; label: string; color: string; blurb: string }[] = [
   { key: "bon_dev", label: "✅ Good Devs", color: "#14F195", blurb: "Developers whose launches held up on-chain." },
   { key: "trader", label: "📈 Traders", color: "#4488FF", blurb: "Wallets with a strong record of realized trades." },
   { key: "rugger", label: "🚩 Proven Ruggers", color: "#FF4444", blurb: "Only addresses whose rugs are proven on-chain are listed." },
+  { key: "cluster", label: "🕸️ Proven Clusters", color: "#8B5CF6", blurb: "Groups of wallets proven to act together. Members are not listed yet." },
 ];
-
-function truncAddr(a: string): string {
-  return a.length < 12 ? a : `${a.slice(0, 6)}...${a.slice(-4)}`;
-}
-
-const EVM_EXPLORERS: Record<string, string> = {
-  eth: "https://etherscan.io/address/",
-  base: "https://basescan.org/address/",
-  bsc: "https://bscscan.com/address/",
-  arb: "https://arbiscan.io/address/",
-  hyperevm: "https://hyperevmscan.io/address/",
-};
-
-const CHAIN_NAMES: Record<string, string> = {
-  eth: "Ethereum", base: "Base", bsc: "BSC", arb: "Arbitrum",
-  hyperevm: "HyperEVM", robinhood: "Robinhood Chain", arc: "Arc",
-};
-
-function explorerUrl(m: Member): string {
-  if (m.chain === "solana") return `https://solscan.io/account/${m.address}`;
-  if (m.chain === "sui") return `https://suivision.xyz/account/${m.address}`;
-  // One known EVM chain gets its own explorer; several or none, Blockscan searches them all.
-  const chains = m.evm_chains ?? [];
-  if (chains.length === 1 && EVM_EXPLORERS[chains[0]]) return EVM_EXPLORERS[chains[0]] + m.address;
-  return `https://blockscan.com/address/${m.address}`;
-}
-
-function chainLabel(m: Member): string {
-  const chains = m.evm_chains ?? [];
-  if (m.chain !== "evm" || chains.length === 0) return m.chain;
-  const names = chains.map((c) => CHAIN_NAMES[c] ?? c);
-  return names.length > 3 ? `${names.slice(0, 3).join(" · ")} +${names.length - 3}` : names.join(" · ");
-}
-
-// The API explains each entry in French; the site is in English.
-function shownWhy(family: Tab, why: string): string {
-  if (family === "trader") {
-    const m = why.match(/(\d+)\s+trades[\s,]+(\d+)\s*%\s+gagnants[\s,]+([\d\s  ]+?)\s*\$\s+réalisés sur\s+(\d+)\s*j/);
-    if (m) {
-      const usd = Number(m[3].replace(/\D/g, "")).toLocaleString("en-US");
-      return `${m[1]} trades · ${m[2]}% winning · $${usd} realized over ${m[4]} days`;
-    }
-    return "Trading record computed on-chain";
-  }
-  if (family === "rugger") return "Rug deployment proven on-chain";
-  return "Computed from the record of their token launches";
-}
 
 export default function FamiliesPage() {
   const [tab, setTab] = useState<Tab>("bon_dev");
@@ -81,7 +26,7 @@ export default function FamiliesPage() {
       .then((d) => {
         const rows: Member[] = d.families?.[tab] ?? [];
         // A rugger is only ever shown once proven, whatever the API sends.
-        setData((prev) => ({ ...prev, [tab]: tab === "rugger" ? rows.filter((m) => m.status === "prouvé") : rows }));
+        setData((prev) => ({ ...prev, [tab]: tab === "rugger" || tab === "cluster" ? rows.filter((m) => isProven(m.status)) : rows }));
         if (d.computed_at) setComputedAt(d.computed_at);
       })
       .catch(() => setFailed(true));
@@ -117,7 +62,7 @@ export default function FamiliesPage() {
       </div>
       <p className="text-[#e8dcc8]/50 text-xs mb-1">{current.blurb}</p>
       <p className="text-[#e8dcc8]/30 text-xs mb-6">
-        <span className="text-[#FFB020]">LEAD</span> = computed by the Court, not yet confirmed.{" "}
+        <span className="text-[#FFB020]">TO VERIFY</span> = computed by the Court, not yet confirmed.{" "}
         <span className="text-[#14F195]">PROVEN</span> = confirmed on-chain. Not investment advice.
       </p>
 
@@ -135,26 +80,34 @@ export default function FamiliesPage() {
             {!list || list.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center py-12 text-[#e8dcc8]/30 font-mono text-xs">
-                  {failed ? "Data unavailable right now." : !list ? "Loading..." : tab === "rugger" ? "No rug proven on-chain yet." : "No entry yet."}
+                  {failed ? "Data unavailable right now." : !list ? "Loading..." : tab === "rugger" ? "No rug proven on-chain yet." : tab === "cluster" ? "No cluster proven on-chain yet." : "No entry yet."}
                 </td>
               </tr>
             ) : (
               list.map((m, i) => {
-                const proven = m.status === "prouvé";
+                const proven = isProven(m.status);
+                const declared = m.names?.sui_name ?? m.names?.ens ?? m.names?.pump_username;
+                const hold = m.trading?.holding_style ? HOLDING[m.trading.holding_style] : undefined;
+                const why = shownWhy(tab, m);
                 return (
                   <tr key={`${m.chain}:${m.address}`} className="border-b border-[#d4a056]/10 hover:bg-[#d4a056]/[0.04]">
                     <td className="hidden sm:table-cell py-3 px-4 text-[#e8dcc8]/20 font-mono">{i + 1}</td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <a
-                        href={explorerUrl(m)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-mono text-xs hover:text-[#d4a056]"
-                      >
+                      <Link href={`/wallet?address=${encodeURIComponent(m.address)}`} className="font-mono text-xs hover:text-[#d4a056] underline decoration-[#d4a056]/30">
                         {truncAddr(m.address)}
-                      </a>
-                      <span className="ml-2 text-[9px] font-mono text-[#d4a056]/50 uppercase">{chainLabel(m)}</span>
-                      <div className="sm:hidden mt-1 text-[#e8dcc8]/60 text-xs whitespace-normal">{shownWhy(tab, m.why)}</div>
+                      </Link>
+                      <span className="ml-2 text-[9px] font-mono text-[#d4a056]/50 uppercase">{chainLabel(m.chain, m.evm_chains)}</span>
+                      {declared && (
+                        <div className="text-[11px] text-[#e8dcc8]/60 mt-0.5" title="Declared by the wallet, not verified">
+                          {declared} <span className="text-[9px] text-[#e8dcc8]/30">· self-declared</span>
+                        </div>
+                      )}
+                      {hold && (
+                        <span className="inline-block mt-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded" style={{ color: hold.color, background: `${hold.color}1f` }}>
+                          {hold.label}
+                        </span>
+                      )}
+                      <div className="sm:hidden mt-1 text-[#e8dcc8]/60 text-xs whitespace-normal">{why}</div>
                     </td>
                     <td className="py-3 px-4">
                       <span
@@ -164,10 +117,10 @@ export default function FamiliesPage() {
                           color: proven ? "#14F195" : "#FFB020",
                         }}
                       >
-                        {proven ? "PROVEN" : "LEAD"}
+                        {proven ? "PROVEN" : "TO VERIFY"}
                       </span>
                     </td>
-                    <td className="hidden sm:table-cell py-3 px-4 text-[#e8dcc8]/60 text-xs">{shownWhy(tab, m.why)}</td>
+                    <td className="hidden sm:table-cell py-3 px-4 text-[#e8dcc8]/60 text-xs">{why}</td>
                   </tr>
                 );
               })
